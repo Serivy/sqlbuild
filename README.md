@@ -1,0 +1,2 @@
+# Introduction
+A set of scripts which can be run against a MSSQL Server that will install an assembly allowing high level actions to aid in building. Primarily the functions focus on restoring and backing up databases but to a remote machine not on the sql server.
