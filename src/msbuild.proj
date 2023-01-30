@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- <PropertyGroup>
+        <ConnectionString></ConnectionString>
+        <BackupFile></BackupFile>
+        <DemoDatbaseName></DemoDatbaseName>
+    </PropertyGroup> -->
+
+    <Target Name="Test">
+        <InstallSqlBuild ConnectionString="$(ConnectionString)" />
+        <BackupDatabase ConnectionString="$(ConnectionString)" Database="master" BackupPath="$(BackupFile)" />
+        <RestoreDatabase ConnectionString="$(ConnectionString)" Database="$(DemoDatbaseName)" BackupPath="$(BackupFile)" />
+    </Target>
+
+    <UsingTask TaskName="InstallSqlBuild" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <ConnectionString ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Data" />
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                    System.Data.SqlClient.SqlConnection connection;
+                    var server = (new System.Data.SqlClient.SqlConnectionStringBuilder(ConnectionString)).DataSource;
+                    connection = new System.Data.SqlClient.SqlConnection(ConnectionString);
+                    Log.LogMessage("SQLBUILD: Connecting to " + server + " on .net " + Environment.Version.ToString(), MessageImportance.High);
+                    connection.InfoMessage += (object obj, System.Data.SqlClient.SqlInfoMessageEventArgs e) => { Log.LogMessage("SQLBUILD: " + e.Message, MessageImportance.High); };
+                    connection.Open();
+
+                    var setupQuery = @"{sql.install.sql}";
+                    new System.Data.SqlClient.SqlCommand(setupQuery, connection).ExecuteNonQuery();
+                    connection.Close();
+                    Log.LogMessage("SQLBUILD: Install complete", MessageImportance.High);
+                ]]></Code>
+        </Task>
+  </UsingTask>
+
+
+    <UsingTask TaskName="BackupDatabase" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <ConnectionString ParameterType="System.String" Required="true" />
+            <Database ParameterType="System.String" Required="true" />
+            <BackupPath ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+        <Reference Include="System.Data" />
+        <Code Type="Fragment" Language="cs"><![CDATA[
+                System.Data.SqlClient.SqlConnection connection;
+                connection = new System.Data.SqlClient.SqlConnection(ConnectionString);
+                connection.InfoMessage += (object obj, System.Data.SqlClient.SqlInfoMessageEventArgs e) => { Log.LogMessage("SQLBUILD: " + e.Message, MessageImportance.High); };
+                connection.Open();
+
+                var cmd = connection.CreateCommand();
+                var param = new System.Data.SqlClient.SqlParameter("@backup", System.Data.SqlDbType.VarBinary, -1);
+                param.Direction = System.Data.ParameterDirection.Output;
+                cmd.CommandText = "master.dbo.CreateBackup";
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.Add(new System.Data.SqlClient.SqlParameter("@name", Database));
+                cmd.Parameters.Add(param);
+                cmd.ExecuteNonQuery();
+                File.WriteAllBytes(BackupPath, (byte[])param.Value);
+            ]]></Code>
+        </Task>
+    </UsingTask>
+
+    <UsingTask TaskName="RestoreDatabase" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <ConnectionString ParameterType="System.String" Required="true" />
+            <Database ParameterType="System.String" Required="true" />
+            <BackupPath ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Data" />
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                System.Data.SqlClient.SqlConnection connection;
+                connection = new System.Data.SqlClient.SqlConnection(ConnectionString);
+                connection.InfoMessage += (object obj, System.Data.SqlClient.SqlInfoMessageEventArgs e) => { Log.LogMessage("SQLBUILD: " + e.Message, MessageImportance.High); };
+                connection.Open();
+
+                var cmd = connection.CreateCommand();
+                var backupBytes = System.IO.File.ReadAllBytes(BackupPath);
+                cmd.CommandText = "exec dbo.RestoreBackup @name = '" + Database + "', @backup = @data";
+                cmd.Parameters.Add(new System.Data.SqlClient.SqlParameter("@data", backupBytes));
+                cmd.ExecuteNonQuery();
+                connection.Close();
+            ]]></Code>
+        </Task>
+    </UsingTask>
+
+    <UsingTask TaskName="UninstallSqlBuild" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <ConnectionString ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Data" />
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                    System.Data.SqlClient.SqlConnection connection;
+                    var server = (new System.Data.SqlClient.SqlConnectionStringBuilder(ConnectionString)).DataSource;
+                    connection = new System.Data.SqlClient.SqlConnection(ConnectionString);
+                    Log.LogMessage("SQLBUILD: Connecting to " + server + " on .net " + Environment.Version.ToString(), MessageImportance.High);
+                    connection.InfoMessage += (object obj, System.Data.SqlClient.SqlInfoMessageEventArgs e) => { Log.LogMessage("SQLBUILD: " + e.Message, MessageImportance.High); };
+                    connection.Open();
+
+                    var setupQuery = @"{sql.uninstall.sql}";
+                    new System.Data.SqlClient.SqlCommand(setupQuery, connection).ExecuteNonQuery();
+                    connection.Close();
+                    Log.LogMessage("SQLBUILD: Install complete", MessageImportance.High);
+                ]]></Code>
+        </Task>
+    </UsingTask>
+</Project>
