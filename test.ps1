@@ -15,12 +15,12 @@ function Invoke-Sqlcmd {
 }
 
 # Test MSBuild scripts.
-& ./msbuild.cmd dist/msbuild.proj /p:DemoDatbaseName="restored-msbuild"`;BackupFile="$PSScriptRoot/obj/backup-msbuild.bak`;ConnectionString=`"$connection`""
+& ./msbuild.cmd $PSScriptRoot/test.proj /p:DemoDatbaseName="restored-msbuild"`;BackupFile="$PSScriptRoot/obj/backup-msbuild.bak`;ConnectionString=`"$connection`""
 Invoke-Sqlcmd -Query "ALTER DATABASE [restored-msbuild] SET OFFLINE WITH ROLLBACK IMMEDIATE; ALTER DATABASE [restored-msbuild] SET ONLINE; DROP DATABASE [restored-msbuild];"
 Invoke-Sqlcmd -Query (Get-Content -path "src/sql.uninstall.sql" -Raw)
 
 # Test powershell
-. ./dist/powershell.ps1
+. ./dist/sqlbuild.ps1
 SqlBuild-Install -ConnectionString $connection
 SqlBuild-BackupDatabase -ConnectionString $connection -Database "master" -BackupPath "$PSScriptRoot/obj/backup-powershell.bak"
 SqlBuild-RestoreDatabase -ConnectionString $connection -Database "restored-powershell" -BackupPath "$PSScriptRoot/obj/backup-powershell.bak"

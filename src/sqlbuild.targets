@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <!-- <PropertyGroup>
-        <ConnectionString></ConnectionString>
-        <BackupFile></BackupFile>
-        <DemoDatbaseName></DemoDatbaseName>
-    </PropertyGroup> -->
-
-    <Target Name="Test">
-        <InstallSqlBuild ConnectionString="$(ConnectionString)" />
-        <BackupDatabase ConnectionString="$(ConnectionString)" Database="master" BackupPath="$(BackupFile)" />
-        <RestoreDatabase ConnectionString="$(ConnectionString)" Database="$(DemoDatbaseName)" BackupPath="$(BackupFile)" />
-    </Target>
-
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <UsingTask TaskName="InstallSqlBuild" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
             <ConnectionString ParameterType="System.String" Required="true" />
