@@ -1,6 +1,6 @@
 $connection = "Server=(localdb)\MSSQLLocalDB;Database=master;Integrated Security=true;"
 $dllname = "sqlbuild.backup"
-$dbName = "Test"
+$dbName = "model"
 
 # Test powershell
 . ./dist/sqlbuild.backup.ps1
