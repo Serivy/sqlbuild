@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="sqlclr\sqlbuild.backup.cs" />
+    <Compile Remove="sqlclr\sqlbuild.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="sqlclr\sqlbuild.backup.cs" />
+    <None Include="sqlclr\sqlbuild.cs" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+	</ItemGroup>
+
+
+</Project>

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src\sqlbuild.tasks\sqlbuild.tasks.csproj" />
+  <Project Path="src\sqlbuild.test\sqlbuild.test.csproj" />
+</Solution>

@@ -1,0 +1,29 @@
+<Project>
+    <PropertyGroup>
+        <SqlBuildAsmDll>$(MSBuildThisFileDirectory)sqlclr\sqlbuild.asm.cs</SqlBuildAsmDll>
+        <SqlBuildBackupAsmDll>$(MSBuildThisFileDirectory)sqlclr\sqlbuild.backup.asm.cs</SqlBuildBackupAsmDll>
+    </PropertyGroup>
+
+    <Target Condition="!Exists('$(SqlBuildAsmDll)') or !Exists('$(SqlBuildBackupAsmDll)')" Name="CompileSqlBuildCore" BeforeTargets="Compile">
+
+        <!-- <PropertyGroup>
+    <RefDir Condition="'$(RefDir)' == ''">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\</RefDir>
+    <RefDir>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\</RefDir>
+  <ClrRefs>$(RefDir)mscorlib.dll;$(RefDir)System.dll;$(RefDir)System.Data.dll</ClrRefs>
+</PropertyGroup> -->
+
+<!-- <Csc Sources="sqlclr\sqlbuild.cs"
+     TargetType="library"
+     OutputAssembly="obj\sqlbuild.dll"
+        References="$(ClrRefs)"
+     NoStandardLib="true"
+     Optimize="true" KeyFile="$(MSBuildThisFileDirectory)..\src\key.snk" /> -->
+
+     <Exec Command="pwsh -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)sqlclr\compile.hash.ps1&quot;"
+           WorkingDirectory="$(MSBuildThisFileDirectory)"
+           ConsoleToMSBuild="true" >
+           <Output TaskParameter="ConsoleOutput" ItemName="CompileHashOutput" />
+        </Exec>
+        <Message Text="CompileHashOutput: @(CompileHashOutput)" Importance="high" />
+    </Target>
+</Project>
