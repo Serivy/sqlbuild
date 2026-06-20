@@ -26,7 +26,7 @@ namespace sqlbuild.tasks
                 {
                     connection.Open();
                     var log = new Action<string, int>((msg, level) => Log.LogMessage(msg, level > 0 ? MessageImportance.High : MessageImportance.Normal));
-                    using (var iso = new IsolatedSqlBuild(connection))
+                    using (var iso = new IsolatedSqlBuild(connection, log))
                     {
                         SqlBuild.RestoreBackup(connection, DatabaseName, BackupPath);
                         Log.LogMessage("SQLBUILD: Backup restored as " + DatabaseName, MessageImportance.High);
